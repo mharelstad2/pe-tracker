@@ -6,11 +6,13 @@
   </head>
   <body>
     <h1>HELLO WORLD at <%= time %>!</h1>
-    <button id="ping" onclick="javascript:send('ping');">Ping</button>
-      <p id="output"></p>
-      <script>
+    <button id="ping">Ping</button>
+    <p id="output"></p>
+    <script>
       const output = document.getElementById("output");
-      const end = async function(buttonId) {
+      const pingButton = document.getElementById("ping");
+
+      pingButton.addEventListener("click", async () => {
         const response = await fetch("/log", {
           method: "POST",
           headers: {
@@ -18,17 +20,17 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            id: buttonId
+            id: "ping"
           })
         });
-        const result = await response.text();
+        const result = await response.json();
         if (result.error) {
           output.innerHTML = `<strong>ERROR: ${result.error}</strong>`;
         }
         else {
           output.innerHTML = `Pong at ${result.time}`;
         }
-      };
-      </script>
+      });
+    </script>
   </body>
 </html>

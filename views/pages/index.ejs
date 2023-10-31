@@ -6,31 +6,29 @@
   </head>
   <body>
     <h1>HELLO WORLD at <%= time %>!</h1>
-    <button id="ping">Ping</button>
+    <button id="ping" onclick="ping()">Ping</button>
     <p id="output"></p>
     <script>
       const output = document.getElementById("output");
-      const pingButton = document.getElementById("ping");
-
-      pingButton.addEventListener("click", async () => {
+      
+      async function ping() {
         const response = await fetch("/log", {
           method: "POST",
           headers: {
             "Accept": "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: "ping"
-          })
+            id: "ping",
+          }),
         });
         const result = await response.json();
         if (result.error) {
           output.innerHTML = `<strong>ERROR: ${result.error}</strong>`;
-        }
-        else {
+        } else {
           output.innerHTML = `Pong at ${result.time}`;
         }
-      });
+      }
     </script>
   </body>
 </html>

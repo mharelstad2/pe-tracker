@@ -2,31 +2,69 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const PORT = process.env.PORT || 5163;
+const { Pool } = require("pg");
 
-const app = express();
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
-app
+express()
   .use(express.static(path.join(__dirname, "public")))
   .use(express.json())
   .use(express.urlencoded({ extended: true }))
   .set("views", path.join(__dirname, "views"))
   .set("view engine", "ejs")
   .get("/", async (req, res) => {
-    const args = {
-      time: Date.now(),
-    };
-    res.render("pages/index", args);
+    try {
+      const client = await pool.connect();
+      const buttonSql = "SELECT * FROM buttons ORDER BY id ASC;";
+      const buttons = await client.query(buttonSql);
+      const args = {
+        "buttons": buttons ? buttons.rows : null,
+        time: Date.now(),
+      };
+      res.render("pages/index", args);
+    } catch (err) {
+      console.error(err);
+      res.set({
+        "Content-Type": "application/json",
+      });
+      res.json({
+        error: err,
+      });
+    }
   })
-  .post("/log", async (req, res) => {
+  .post("/log", async(req, res) => {
     res.set({
       "Content-Type": "application/json",
     });
-    res.json({
-      time: Date.now(),
-    });
+
+    try {
+      const client = await pool.connect();
+      const id = req.body.id
+      const insertSql = `INSERT INTO buttons (name)
+        VALUES (concat('Child of ', $1::text))
+        RETURNING id AS new_id;`;
+      const selectSql = "SELECT LOCALTIME;";
+
+      const insert = await client.query(insertSql, [id]);
+      const select = await client.query(selectSql);
+
+      const response = {
+        newId: insert ? insert.rows[0] : null,
+        when: select ? select.rows[0] : null
+      };
+      res.json(response);
+      client.release();
+    }
+    catch (err) {
+      console.error(err);
+      res.json({
+        error: err
+      });
+    }
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
-
-
-
-

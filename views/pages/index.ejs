@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
   </head>
   <body>
-    <h1>HELLO WORLD at <%= time %>!</h1>
-    <button id="ping" onclick="ping()">Ping</button>
+    <h1>HELLO WORLD!</h1>
+    <% buttons.forEach(function(b) { %>
+      <button id="<%= b.id %>" onclick="javascript:send(<%= b.id %>);">
+        <%= b.name %>
+      </button>
+    <% }); %>
     <p id="output"></p>
     <script>
       const output = document.getElementById("output");
@@ -24,9 +28,9 @@
         });
         const result = await response.json();
         if (result.error) {
-          output.innerHTML = `<strong>ERROR: ${result.error}</strong>`;
+          output.innerHTML = `<strong>ERROR: ${result.error.routine}</strong>`;
         } else {
-          output.innerHTML = `Pong at ${result.time}`;
+          output.innerHTML = `Created button ${result.newId.newId} at ${result.when.localtime}. Refresh to view them all!`;
         }
       }
     </script>

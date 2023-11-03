@@ -12,7 +12,37 @@
       </button>
     <% }); %>
     <p id="output"></p>
+    <h1>Observer App</h1>
+    <button id="praiseButton" onclick="incrementCount('praise')">Praise</button>
+    <button id="criticizeButton" onclick="incrementCount('criticize')">Criticize</button>
+    <button id="resetButton" onclick="resetCounts()">Reset Counts</button>
+    <p>Praise Count: <span id="praiseCount">0</span></p>
+    <p>Criticize Count: <span id="criticizeCount">0</span></p>
+
     <script>
+      // JavaScript functions to handle button clicks and count updates
+      let praiseCount = 0;
+      let criticizeCount = 0;
+
+      function incrementCount(type) {
+        if (type === 'praise') {
+          praiseCount++;
+          document.getElementById('praiseCount').textContent = praiseCount;
+        } else if (type === 'criticize') {
+          criticizeCount++;
+          document.getElementById('criticizeCount').textContent = criticizeCount;
+        }
+      }
+
+      function resetCounts() {
+        praiseCount = 0;
+        criticizeCount = 0;
+        document.getElementById('praiseCount').textContent = praiseCount;
+        document.getElementById('criticizeCount').textContent = criticizeCount;
+      }
+    </script>
+    <script>
+      // JavaScript functions to handle test button clicks
       const output = document.getElementById("output");
 
       async function send(id) {

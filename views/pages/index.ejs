@@ -40,11 +40,10 @@
       }
     </style>
   </head>
-  </head>
   <body>
     <h1>Hello World!</h1>
     <% buttons.forEach(function(b) { %>
-      <button id="<%= b.id %>" onclick="send('<%= b.id %>');">
+      <button id="behavior-<%= b.id %>" onclick="send('<%= b.id %>');">
         <%= b.name %>
       </button>
     <% }); %>
@@ -57,7 +56,7 @@
     <p>Criticize Count: <span id="criticizeCount">0</span></p>
 
     <script>
-      // JavaScript functions to handle button clicks and count updates
+      // JavaScript functions for counting behavior
       let praiseCount = 0;
       let criticizeCount = 0;
 
@@ -78,29 +77,49 @@
         document.getElementById('criticizeCount').textContent = criticizeCount;
       }
     </script>
+
     <script>
-      // JavaScript functions to handle test button clicks
-      const output = document.getElementById("output");
+      // JavaScript functions to handle button clicks and count updates
+      let buttonClicked = false; // Add this variable to track button clicks
+      let behaviorCounts = {};
 
       async function send(id) {
-        const response = await fetch("/log", {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: id,
-          }),
-        });
-        const result = await response.json();
-        if (result.error) {
-          output.innerHTML = `<strong>ERROR: ${result.error.routine}`;
-        } else {
-          output.innerHTML = `Created button ${result.newId.new_id} at ${result.when.localtime} Refresh to view them all!`;
+        if (!buttonClicked) {
+          buttonClicked = true; // Set the flag to prevent further clicks
+
+          const response = await fetch("/log", {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: id,
+            }),
+          });
+          const result = await response.json();
+          if (result.error) {
+            document.getElementById("output").innerHTML = `<strong>ERROR: ${result.error.routine}`;
+          } else {
+            const behaviorId = result.newId.new_id;
+            const currentTime = result.when.localtime;
+            behaviorCounts[behaviorId] = (behaviorCounts[behaviorId] || 0) + 1;
+            updateBehaviorCountsUI();
+          }
+        }
+      }
+
+      function updateBehaviorCountsUI() {
+        for (const behaviorId in behaviorCounts) {
+          if (behaviorCounts.hasOwnProperty(behaviorId)) {
+            const count = behaviorCounts[behaviorId];
+            document.getElementById(`count-${behaviorId}`).textContent = count;
+          }
         }
       }
     </script>
   </body>
 </html>
+
+
 

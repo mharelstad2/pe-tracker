@@ -4,12 +4,10 @@ CREATE TABLE buttons (
   name TEXT NOT NULL
 );
 
--- Create log table
 CREATE TABLE log (
   id SERIAL PRIMARY KEY,
-  button_id INTEGER NOT NULL,
-  at TIMESTAMPTZ NOT NULL
+  button_id INTEGER REFERENCES buttons(id),
+  at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert a sample button
-INSERT INTO buttons (name) VALUES ('Test');
+

@@ -39,87 +39,55 @@
         margin: 10px;
       }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   </head>
   <body>
     <h1>Hello World!</h1>
-    <% buttons.forEach(function(b) { %>
-      <button id="behavior-<%= b.id %>" onclick="send('<%= b.id %>');">
-        <%= b.name %>
-      </button>
-    <% }); %>
-    <p id="output"></p>
-    <h1>Observer App</h1>
-    <button id="praiseButton" onclick="incrementCount('praise')">Praise</button>
-    <button id="criticizeButton" onclick="incrementCount('criticize')">Criticize</button>
-    <button id="resetButton" onclick="resetCounts()">Reset Counts</button>
-    <p>Praise Count: <span id="praiseCount">0</span></p>
-    <p>Criticize Count: <span id="criticizeCount">0</span></p>
+    <% if (buttons && buttons.length > 0) { %>
+      <% buttons.forEach(function(b) { %>
+        <!-- Inside the loop for rendering buttons -->
+        <button id="behavior-<%= b.id %>" onclick="sendButtonPress('<%= b.id %>', '<%= b.name %>');">
+          <%= b.name %>
+        </button>
+        <p>Count: <span id="count-<%= b.id %>">0</span></p>
+      <% }); %>
+    <% } else { %>
+      <p>No buttons found.</p>
+    <% } %>
 
     <script>
-      // JavaScript functions for counting behavior
-      let praiseCount = 0;
-      let criticizeCount = 0;
-
-      function incrementCount(type) {
-        if (type === 'praise') {
-          praiseCount++;
-          document.getElementById('praiseCount').textContent = praiseCount;
-        } else if (type === 'criticize') {
-          criticizeCount++;
-          document.getElementById('criticizeCount').textContent = criticizeCount;
-        }
+      function sendButtonPress(buttonId, buttonName) {
+        $.ajax({
+          type: "POST",
+          url: "/log",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({ id: buttonId, name: buttonName }),
+          success: function (response) {
+            // Handle success, e.g., update the count on the client side
+            updateCount(buttonId);
+          },
+          error: function (error) {
+            console.error(error);
+          },
+        });
       }
-
-      function resetCounts() {
-        praiseCount = 0;
-        criticizeCount = 0;
-        document.getElementById('praiseCount').textContent = praiseCount;
-        document.getElementById('criticizeCount').textContent = criticizeCount;
-      }
-    </script>
-
-    <script>
-      // JavaScript functions to handle button clicks and count updates
-      let buttonClicked = false; // Add this variable to track button clicks
-      let behaviorCounts = {};
-
-      async function send(id) {
-        if (!buttonClicked) {
-          buttonClicked = true; // Set the flag to prevent further clicks
-
-          const response = await fetch("/log", {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: id,
-            }),
-          });
-          const result = await response.json();
-          if (result.error) {
-            document.getElementById("output").innerHTML = `<strong>ERROR: ${result.error.routine}`;
-          } else {
-            const behaviorId = result.newId.new_id;
-            const currentTime = result.when.localtime;
-            behaviorCounts[behaviorId] = (behaviorCounts[behaviorId] || 0) + 1;
-            updateBehaviorCountsUI();
-          }
-        }
-      }
-
-      function updateBehaviorCountsUI() {
-        for (const behaviorId in behaviorCounts) {
-          if (behaviorCounts.hasOwnProperty(behaviorId)) {
-            const count = behaviorCounts[behaviorId];
-            document.getElementById(`count-${behaviorId}`).textContent = count;
-          }
-        }
+    
+      function updateCount(buttonId) {
+        // Update the count on the client side based on the buttonId
+        const countElement = document.getElementById(`count-${buttonId}`);
+        const currentCount = parseInt(countElement.textContent);
+        const newCount = currentCount + 1;
+        countElement.textContent = newCount;
+    
+        // Continue the counting
+        sendButtonPress(buttonId, ''); // Pass an empty name or modify as needed
       }
     </script>
+    
+
   </body>
 </html>
+
 
 
 

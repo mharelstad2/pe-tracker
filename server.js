@@ -3,8 +3,6 @@ const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
 
-require("dotenv").config();
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -24,8 +22,8 @@ app
   .get("/", async (req, res) => {
     try {
       const client = await pool.connect();
-      const buttonSql = "SELECT * FROM buttons ORDER BY id ASC;";
-      const buttons = await client.query(buttonSql);
+      const buttonsSql = "SELECT * FROM buttons ORDER BY id ASC;";
+      const buttons = await client.query(buttonsSql);
       const args = {
         buttons: buttons ? buttons.rows : null,
         time: Date.now(),
@@ -45,19 +43,22 @@ app
     res.set({
       "Content-Type": "application/json",
     });
-
+  
     try {
       const client = await pool.connect();
-      const id = req.body.id;
+      const { id, name } = req.body; // Extract id and name from req.body
       const insertSql = `INSERT INTO log (button_id, at) VALUES ($1, NOW()) RETURNING id AS new_id;`;
-
+  
+      // Use the name directly as the buttonType
+      const buttonType = name;
+  
       const insert = await client.query(insertSql, [id]);
-
+  
       const response = {
-        newId: insert ? insert.rows[0] : null,
+        newId: insert ? insert.rows[0].new_id : null,
         when: { localtime: new Date() },
       };
-      res.json(response); // Fixed the syntax error here
+      res.json(response);
     } catch (err) {
       console.error(err);
       res.json({

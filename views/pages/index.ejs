@@ -56,7 +56,6 @@
 
     <script>
       function sendButtonPress(buttonId, buttonName) {
-        console.log(`Button pressed: ID ${buttonId}, Name ${buttonName}`);
         $.ajax({
           type: "POST",
           url: "/log",
@@ -68,8 +67,6 @@
             const currentCount = parseInt(countElement.textContent, 10);
             const newCount = currentCount + 1;
             countElement.textContent = newCount;
-
-            console.log(`Count updated for button ID ${buttonId}. New count: ${newCount}`);
           },
           error: function (error) {
             console.error(error);

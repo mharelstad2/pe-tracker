@@ -44,14 +44,13 @@ app
       "Content-Type": "application/json",
     });
   
-    try {
-      const client = await pool.connect();
-      const { id, name } = req.body; // Extract id and name from req.body
-      console.log(`Received button click. ID: ${id}, Name: ${name}`);
-      const insertSql = `INSERT INTO log (button_id, at) VALUES ($1, NOW()) RETURNING id AS new_id;`;
+    let client; // Declare the 'client' variable outside the try block
   
-      // Use the name directly as the buttonType
-      const buttonType = name;
+    try {
+      client = await pool.connect();
+      const { id, name } = req.body;
+  
+      const insertSql = `INSERT INTO log (button_id, at) VALUES ($1, NOW()) RETURNING id AS new_id;`;
   
       const insert = await client.query(insertSql, [id]);
   
@@ -59,12 +58,21 @@ app
         newId: insert ? insert.rows[0].new_id : null,
         when: { localtime: new Date() },
       };
+  
+  
       res.json(response);
     } catch (err) {
       console.error(err);
       res.json({
         error: err,
       });
+    } finally {
+      if (client) {
+        // Ensure the connection is released back to the pool
+        client.release();
+      }
     }
   })
+  
+  
   .listen(PORT, () => console.log(`Listening on ${PORT}`));

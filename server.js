@@ -47,6 +47,7 @@ app
     try {
       const client = await pool.connect();
       const { id, name } = req.body; // Extract id and name from req.body
+      console.log(`Received button click. ID: ${id}, Name: ${name}`);
       const insertSql = `INSERT INTO log (button_id, at) VALUES ($1, NOW()) RETURNING id AS new_id;`;
   
       // Use the name directly as the buttonType

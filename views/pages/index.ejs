@@ -4,7 +4,6 @@
     <title>PE Tracker</title>
     <meta charset="UTF-8">
     <style>
-      /* Added CSS styles here */
       body {
         font-family: Arial, sans-serif;
         background-color: #f2f2f2;
@@ -27,11 +26,11 @@
         background-color: #0056b3;
       }
 
-      button#praiseButton {
+      #praiseButton {
         background-color: #4caf50;
       }
 
-      button#criticizeButton {
+      #criticizeButton {
         background-color: #ff5722;
       }
 
@@ -46,7 +45,7 @@
     <% if (buttons && buttons.length > 0) { %>
       <% buttons.forEach(function(b) { %>
         <!-- Inside the loop for rendering buttons -->
-        <button id="behavior-<%= b.id %>" onclick="sendButtonPress('<%= b.id %>', '<%= b.name %>');">
+        <button id="behavior-<%= b.id %>" onclick="sendButtonPress('<%= b.id %>', '<%= b.name %>');" class="<%= b.name.toLowerCase() %>Button">
           <%= b.name %>
         </button>
         <p>Count: <span id="count-<%= b.id %>">0</span></p>
@@ -57,37 +56,26 @@
 
     <script>
       function sendButtonPress(buttonId, buttonName) {
+        console.log(`Button pressed: ID ${buttonId}, Name ${buttonName}`);
         $.ajax({
           type: "POST",
           url: "/log",
           contentType: "application/json; charset=utf-8",
           data: JSON.stringify({ id: buttonId, name: buttonName }),
           success: function (response) {
-            // Handle success, e.g., update the count on the client side
-            updateCount(buttonId);
+            // Handle success, update the count directly
+            const countElement = document.getElementById(`count-${buttonId}`);
+            const currentCount = parseInt(countElement.textContent, 10);
+            const newCount = currentCount + 1;
+            countElement.textContent = newCount;
+
+            console.log(`Count updated for button ID ${buttonId}. New count: ${newCount}`);
           },
           error: function (error) {
             console.error(error);
           },
         });
       }
-    
-      function updateCount(buttonId) {
-        // Update the count on the client side based on the buttonId
-        const countElement = document.getElementById(`count-${buttonId}`);
-        const currentCount = parseInt(countElement.textContent);
-        const newCount = currentCount + 1;
-        countElement.textContent = newCount;
-    
-        // Continue the counting
-        sendButtonPress(buttonId, ''); // Pass an empty name or modify as needed
-      }
     </script>
-    
-
   </body>
 </html>
-
-
-
-
